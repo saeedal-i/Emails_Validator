@@ -1,0 +1,1636 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Validator Pro</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="bg-light">
+    <div class="container-fluid py-4">
+        <div class="card shadow-sm mb-4">
+            <div class="card-body">
+                <div class="text-center mb-4">
+                    <i class="fas fa-envelope-circle-check text-primary" style="font-size: 3rem;"></i>
+                    <h1 class="mt-3">Email Tools Suite</h1>
+                    <p class="text-muted">Extract, validate, and manage email addresses</p>
+                </div>
+
+                <!-- Tab Navigation -->
+                <ul class="nav nav-tabs mb-4" id="emailToolsTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="validator-tab" data-bs-toggle="tab" data-bs-target="#validator-content" 
+                            type="button" role="tab" aria-controls="validator-content" aria-selected="true">
+                            <i class="fas fa-check-circle me-2"></i>Email Validator
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="extractor-tab" data-bs-toggle="tab" data-bs-target="#extractor-content" 
+                            type="button" role="tab" aria-controls="extractor-content" aria-selected="false">
+                            <i class="fas fa-search me-2"></i>Email Extractor
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="extract-validate-tab" data-bs-toggle="tab" data-bs-target="#extract-validate-content" 
+                            type="button" role="tab" aria-controls="extract-validate-content" aria-selected="false">
+                            <i class="fas fa-magic me-2"></i>Extract & Validate
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="website-crawler-tab" data-bs-toggle="tab" data-bs-target="#website-crawler-content" 
+                            type="button" role="tab" aria-controls="website-crawler-content" aria-selected="false">
+                            <i class="fas fa-globe me-2"></i>Website Crawler
+                        </button>
+                    </li>
+                </ul>
+
+                <!-- Tab Content -->
+                <div class="tab-content" id="emailToolsTabContent">
+                    <!-- Validator Tab -->
+                    <div class="tab-pane fade show active" id="validator-content" role="tabpanel" aria-labelledby="validator-tab">
+                        <div class="card mb-4">
+                            <div class="card-header bg-primary text-white">
+                                <h2 class="h5 mb-0"><i class="fas fa-keyboard me-2"></i>Input Emails</h2>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <label for="emailListInput" class="form-label">
+                                        <i class="fas fa-info-circle me-1"></i> Enter one email address per line to check validity:
+                                    </label>
+                                    <textarea id="emailListInput" class="form-control" rows="8" 
+                                        placeholder="e.g., valid@example.com
+invalid-syntax
+user@nonexistentdomain123.org
+user@gmail.com"
+                                        aria-describedby="emailInputHelp"></textarea>
+                                    <div id="emailInputHelp" class="form-text">
+                                        Each email will be checked for syntax, domain validity, and mailbox existence.
+                                    </div>
+                                    <div id="emailValidationFeedback" class="mt-2"></div>
+                                </div>
+                                <button id="validateEmailsButton" class="btn btn-primary">
+                                    <i class="fas fa-check-circle me-2"></i>Validate Emails
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Extractor Tab -->
+                    <div class="tab-pane fade" id="extractor-content" role="tabpanel" aria-labelledby="extractor-tab">
+                        <div class="card mb-4">
+                            <div class="card-header bg-primary text-white">
+                                <h2 class="h5 mb-0"><i class="fas fa-search me-2"></i>Extract Emails</h2>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <label for="rawTextInput" class="form-label">
+                                        <i class="fas fa-info-circle me-1"></i> Paste raw text containing email addresses:
+                                    </label>
+                                    <textarea id="rawTextInput" class="form-control" rows="8" 
+                                        placeholder="Paste any text containing email addresses here. For example:
+
+Contact us at support@example.com or sales@example.com
+For more information, email info@company.org"
+                                        aria-describedby="rawTextInputHelp"></textarea>
+                                    <div id="rawTextInputHelp" class="form-text">
+                                        All email addresses will be extracted from the text.
+                                    </div>
+                                </div>
+                                <button id="extractEmailsButton" class="btn btn-primary">
+                                    <i class="fas fa-search me-2"></i>Extract Emails
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card mb-4" id="extractedEmailsCard" style="display: none;">
+                            <div class="card-header bg-light">
+                                <h2 class="h5 mb-0"><i class="fas fa-list me-2"></i>Extracted Emails</h2>
+                            </div>
+                            <div class="card-body">
+                                <div id="extractedEmailsCount" class="alert alert-info">
+                                    <i class="fas fa-info-circle me-2"></i><span>0 emails found</span>
+                                </div>
+                                <textarea id="extractedEmailsTextarea" class="form-control mb-3" rows="6" readonly></textarea>
+                                <div class="text-end">
+                                    <button id="copyExtractedEmailsButton" class="btn btn-outline-primary">
+                                        <i class="fas fa-copy me-2"></i>Copy Emails
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Extract & Validate Tab -->
+                    <div class="tab-pane fade" id="extract-validate-content" role="tabpanel" aria-labelledby="extract-validate-tab">
+                        <div class="card mb-4">
+                            <div class="card-header bg-primary text-white">
+                                <h2 class="h5 mb-0"><i class="fas fa-magic me-2"></i>Extract & Validate Emails</h2>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <label for="extractValidateInput" class="form-label">
+                                        <i class="fas fa-info-circle me-1"></i> Paste raw text containing email addresses:
+                                    </label>
+                                    <textarea id="extractValidateInput" class="form-control" rows="8" 
+                                        placeholder="Paste any text containing email addresses here. For example:
+
+Contact us at support@example.com or sales@example.com
+For more information, email info@company.org"
+                                        aria-describedby="extractValidateInputHelp"></textarea>
+                                    <div id="extractValidateInputHelp" class="form-text">
+                                        All email addresses will be extracted and validated in one step.
+                                    </div>
+                                </div>
+                                <button id="extractValidateButton" class="btn btn-primary">
+                                    <i class="fas fa-magic me-2"></i>Extract & Validate
+                                </button>
+                            </div>
+                        </div>
+
+                    <!-- Website Crawler Tab -->
+                    <div class="tab-pane fade" id="website-crawler-content" role="tabpanel" aria-labelledby="website-crawler-tab">
+                        <div class="card mb-4">
+                            <div class="card-header bg-primary text-white">
+                                <h2 class="h5 mb-0"><i class="fas fa-globe me-2"></i>Website Crawler</h2>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <label for="websiteUrl" class="form-label">
+                                        <i class="fas fa-info-circle me-1"></i> Enter website URL to crawl:
+                                    </label>
+                                    <input type="text" id="websiteUrl" class="form-control" 
+                                        placeholder="e.g., example.com or https://example.com"
+                                        aria-describedby="websiteUrlHelp">
+                                    <div id="websiteUrlHelp" class="form-text">
+                                        The website will be crawled to extract contact information including emails, phone numbers, and social media links.
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="crawlDepth" class="form-label">Crawl Depth:</label>
+                                    <select id="crawlDepth" class="form-select" aria-describedby="crawlDepthHelp">
+                                        <option value="0">0 - Just the main page</option>
+                                        <option value="1">1 - Main page and linked pages</option>
+                                        <option value="2">2 - Deep crawl (may take longer)</option>
+                                    </select>
+                                    <div id="crawlDepthHelp" class="form-text">
+                                        Higher depth values will crawl more pages but take longer to complete.
+                                    </div>
+                                </div>
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="checkbox" id="validateCrawledEmails">
+                                    <label class="form-check-label" for="validateCrawledEmails">
+                                        Validate extracted emails
+                                    </label>
+                                </div>
+                                <button id="crawlWebsiteButton" class="btn btn-primary">
+                                    <i class="fas fa-spider me-2"></i>Crawl Website
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Crawler Results Section -->
+                        <div id="crawlerResults" style="display: none;">
+                            <!-- Summary Card -->
+                            <div class="card mb-4">
+                                <div class="card-header bg-light">
+                                    <h2 class="h5 mb-0"><i class="fas fa-chart-pie me-2"></i>Crawl Summary</h2>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-3 mb-3">
+                                            <div class="card bg-light">
+                                                <div class="card-body text-center">
+                                                    <h3 class="h2 mb-0" id="crawledPagesCount">0</h3>
+                                                    <p class="text-muted mb-0">Pages Crawled</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3 mb-3">
+                                            <div class="card bg-info text-white">
+                                                <div class="card-body text-center">
+                                                    <h3 class="h2 mb-0" id="crawledEmailsCount">0</h3>
+                                                    <p class="mb-0">Emails Found</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3 mb-3">
+                                            <div class="card bg-primary text-white">
+                                                <div class="card-body text-center">
+                                                    <h3 class="h2 mb-0" id="crawledPhonesCount">0</h3>
+                                                    <p class="mb-0">Phone Numbers</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3 mb-3">
+                                            <div class="card bg-secondary text-white">
+                                                <div class="card-body text-center">
+                                                    <h3 class="h2 mb-0" id="crawledSocialCount">0</h3>
+                                                    <p class="mb-0">Social Links</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="text-end mt-3">
+                                        <button id="downloadCrawlResultsButton" class="btn btn-outline-primary me-2">
+                                            <i class="fas fa-download me-2"></i>Download CSV
+                                        </button>
+                                        <button id="copyAllCrawlResultsButton" class="btn btn-outline-primary">
+                                            <i class="fas fa-copy me-2"></i>Copy All Emails
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Tabs for different types of results -->
+                            <ul class="nav nav-tabs mb-3" id="crawlResultsTabs" role="tablist">
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link active" id="emails-tab" data-bs-toggle="tab" data-bs-target="#emails-content" 
+                                        type="button" role="tab" aria-controls="emails-content" aria-selected="true">
+                                        <i class="fas fa-envelope me-2"></i>Emails
+                                    </button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" id="phones-tab" data-bs-toggle="tab" data-bs-target="#phones-content" 
+                                        type="button" role="tab" aria-controls="phones-content" aria-selected="false">
+                                        <i class="fas fa-phone me-2"></i>Phone Numbers
+                                    </button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" id="social-tab" data-bs-toggle="tab" data-bs-target="#social-content" 
+                                        type="button" role="tab" aria-controls="social-content" aria-selected="false">
+                                        <i class="fas fa-share-alt me-2"></i>Social Media
+                                    </button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" id="people-tab" data-bs-toggle="tab" data-bs-target="#people-content" 
+                                        type="button" role="tab" aria-controls="people-content" aria-selected="false">
+                                        <i class="fas fa-users me-2"></i>People
+                                    </button>
+                                </li>
+                            </ul>
+
+                            <!-- Tab Content -->
+                            <div class="tab-content" id="crawlResultsTabContent">
+                                <!-- Emails Tab -->
+                                <div class="tab-pane fade show active" id="emails-content" role="tabpanel" aria-labelledby="emails-tab">
+                                    <div class="card mb-4">
+                                        <div class="card-body">
+                                            <div id="crawledEmailsList" class="list-group mb-3">
+                                                <!-- Email items will be added here dynamically -->
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Phones Tab -->
+                                <div class="tab-pane fade" id="phones-content" role="tabpanel" aria-labelledby="phones-tab">
+                                    <div class="card mb-4">
+                                        <div class="card-body">
+                                            <div id="crawledPhonesList" class="list-group mb-3">
+                                                <!-- Phone items will be added here dynamically -->
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Social Media Tab -->
+                                <div class="tab-pane fade" id="social-content" role="tabpanel" aria-labelledby="social-tab">
+                                    <div class="card mb-4">
+                                        <div class="card-body">
+                                            <div id="crawledSocialList" class="list-group mb-3">
+                                                <!-- Social media items will be added here dynamically -->
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- People Tab -->
+                                <div class="tab-pane fade" id="people-content" role="tabpanel" aria-labelledby="people-tab">
+                                    <div class="card mb-4">
+                                        <div class="card-body">
+                                            <div id="crawledPeopleList" class="list-group mb-3">
+                                                <!-- People items will be added here dynamically -->
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                        <!-- Results Section -->
+                        <div id="extractValidateResults" style="display: none;">
+                            <!-- Summary Card -->
+                            <div class="card mb-4">
+                                <div class="card-header bg-light">
+                                    <h2 class="h5 mb-0"><i class="fas fa-chart-pie me-2"></i>Summary</h2>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-3 mb-3">
+                                            <div class="card bg-light">
+                                                <div class="card-body text-center">
+                                                    <h3 class="h2 mb-0" id="totalEmailsFound">0</h3>
+                                                    <p class="text-muted mb-0">Total Emails</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3 mb-3">
+                                            <div class="card bg-success text-white">
+                                                <div class="card-body text-center">
+                                                    <h3 class="h2 mb-0" id="validEmailsCount">0</h3>
+                                                    <p class="mb-0">Valid</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3 mb-3">
+                                            <div class="card bg-warning">
+                                                <div class="card-body text-center">
+                                                    <h3 class="h2 mb-0" id="potentiallyValidEmailsCount">0</h3>
+                                                    <p class="mb-0">Potentially Valid</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3 mb-3">
+                                            <div class="card bg-danger text-white">
+                                                <div class="card-body text-center">
+                                                    <h3 class="h2 mb-0" id="invalidEmailsCount">0</h3>
+                                                    <p class="mb-0">Invalid</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="text-end mt-3">
+                                        <button id="downloadResultsButton" class="btn btn-outline-primary me-2">
+                                            <i class="fas fa-download me-2"></i>Download CSV
+                                        </button>
+                                        <button id="copyAllResultsButton" class="btn btn-outline-primary">
+                                            <i class="fas fa-copy me-2"></i>Copy All
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Detailed Results Table -->
+                            <div class="card mb-4">
+                                <div class="card-header bg-light">
+                                    <h2 class="h5 mb-0"><i class="fas fa-table me-2"></i>Validation Results</h2>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover" id="extractValidateResultsTable">
+                                            <thead>
+                                                <tr>
+                                                    <th>Email</th>
+                                                    <th>Syntax</th>
+                                                    <th>Domain</th>
+                                                    <th>SMTP</th>
+                                                    <th>Status</th>
+                                                    <th>Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td colspan="6" class="text-center">No results yet. Extract and validate emails to see results.</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-center my-4">
+                    <div id="loaderSpinner" class="spinner-border text-primary" role="status" style="display:none;">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+
+                <div id="errorMessageDisplay" class="alert alert-danger" role="alert" style="display:none;"></div>
+
+                <div class="card mb-4">
+                    <div class="card-header bg-light d-flex justify-content-between align-items-center" id="detailedResultsHeader" role="button" aria-expanded="false" aria-controls="detailedResultsContent">
+                        <h2 class="h5 mb-0"><i class="fas fa-list-ul me-2"></i>Detailed Per-Email Results</h2>
+                        <span class="toggle-icon"><i class="fas fa-chevron-down"></i></span>
+                    </div>
+                    <div id="detailedResultsContent" class="card-body collapse">
+                        <div class="table-responsive">
+                            <table class="table table-hover" id="resultsTable">
+                                <thead>
+                                    <tr>
+                                        <th>Email</th>
+                                        <th>Status</th>
+                                        <th>Details</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td colspan="3" class="text-center">Validation results will appear here after processing...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mb-4">
+                    <div class="card-header bg-light">
+                        <h2 class="h5 mb-0"><i class="fas fa-clipboard-list me-2"></i>Processed List for Automation</h2>
+                    </div>
+                    <div class="card-body">
+                        <p>Each input email with its determined automation eligibility status:</p>
+                        <textarea id="finalProcessedListTextarea" class="form-control mb-3" rows="6" readonly 
+                            placeholder="Processed list will appear here..."></textarea>
+                        <div class="text-end">
+                            <button id="copyProcessedListButton" class="btn btn-outline-primary">
+                                <i class="fas fa-copy me-2"></i>Copy Results
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion mb-4" id="diagnosticsAccordion">
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="diagnosticsHeading">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" 
+                                data-bs-target="#diagnosticsLogContent" aria-expanded="false" aria-controls="diagnosticsLogContent">
+                                <i class="fas fa-bug me-2"></i>Developer Diagnostics Log
+                            </button>
+                        </h2>
+                        <div id="diagnosticsLogContent" class="accordion-collapse collapse" aria-labelledby="diagnosticsHeading">
+                            <div class="accordion-body">
+                                <!-- Diagnostic logs will appear here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <footer class="text-center text-muted mt-5 pt-3 border-top">
+                    <p>Email Validator Pro &copy; 2025 | A reliable tool for email verification</p>
+                </footer>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast for notifications -->
+    <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+        <div id="toastMessage" class="toast align-items-center text-white bg-dark border-0" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body">
+                    <i class="fas fa-check-circle me-2"></i><span id="toastText">Copied to clipboard!</span>
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
+
+<script>
+    "use strict";
+
+    let emailListTextarea, validateButton, detailedResultsContentElement, loaderElement,
+        errorMessageElement, diagnosticsLogContentElement, diagnosticsHeaderElement,
+        detailedResultsHeaderElement, resultsTable, emailValidationFeedback,
+        finalProcessedListTextarea, copyProcessedListButton, toastMessageElement, toastInstance;
+
+    function logDiagnostic(message, isError = false) {
+        console.log(message);
+        if (diagnosticsLogContentElement) {
+            const p = document.createElement('p');
+            p.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            p.classList.add('log-entry');
+            if (isError) p.classList.add('log-error');
+            diagnosticsLogContentElement.insertBefore(p, diagnosticsLogContentElement.firstChild);
+        }
+    }
+
+function escapeHtml(unsafe) {
+    if (unsafe === null || typeof unsafe === 'undefined') return '';
+    return unsafe.toString()
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+
+    function determineAutomationEligibility(result) {
+        if (!result.syntax_valid || !result.domain_has_mx) {
+            return { status: "Not Eligible", class: "status-invalid", reason: "Invalid syntax or domain issue." };
+        }
+
+        // Check for likely fake emails
+        const statusLower = result.overall_status.toLowerCase();
+        if (statusLower.includes("likely fake") || statusLower.includes("random-looking")) {
+            return { status: "Not Eligible", class: "status-invalid", reason: "Email appears to be randomly generated." };
+        }
+
+        if (result.smtp_check_attempted) {
+            if (result.smtp_user_exists) {
+                return { status: "Eligible", class: "status-valid", reason: "Syntax, domain, and SMTP check passed." };
+            } else {
+                const smtpMsgLower = result.smtp_message.toLowerCase();
+                if (smtpMsgLower.includes("rejected") || smtpMsgLower.includes("non-existent") || smtpMsgLower.includes("refused") || smtpMsgLower.includes("no such user")) {
+                    return { status: "Not Eligible", class: "status-invalid", reason: "SMTP check indicates user does not exist." };
+                } else {
+                    return { status: "Eligible", class: "status-warning", reason: "SMTP check was inconclusive; manual review may be needed." };
+                }
+            }
+        } else {
+            return { status: "Eligible", class: "status-warning", reason: "SMTP check skipped; syntax and domain are OK." };
+        }
+    }
+
+    function displayValidationResults(validationResults) {
+        logDiagnostic("SCRIPT: STEP 5 - Displaying validation results.");
+
+        // Get the table body
+        const tableBody = resultsTable.querySelector('tbody');
+        tableBody.innerHTML = ''; // Clear previous results
+
+        let processedListContent = "";
+
+        if (!validationResults || validationResults.length === 0) {
+            tableBody.innerHTML = '<tr><td colspan="3" class="text-center">No results to display.</td></tr>';
+            finalProcessedListTextarea.value = '';
+            copyProcessedListButton.disabled = true;
+            return;
+        }
+
+        // Show the detailed results section
+        if (detailedResultsContentElement.classList.contains('collapse')) {
+            new bootstrap.Collapse(detailedResultsContentElement).show();
+        }
+
+        validationResults.forEach((result, index) => {
+            // Determine status class and badge color
+            let statusClass = 'bg-info';
+            let textClass = 'text-dark';
+            const overallStatusLower = result.overall_status.toLowerCase();
+
+            if (overallStatusLower.includes('valid (smtp verified)')) {
+                statusClass = 'bg-success';
+                textClass = 'text-white';
+            } else if (overallStatusLower.includes('potentially valid')) {
+                statusClass = 'bg-warning';
+            } else if (overallStatusLower.includes('invalid') || 
+                      overallStatusLower.includes('issue') || 
+                      overallStatusLower.includes('rejected')) {
+                statusClass = 'bg-danger';
+                textClass = 'text-white';
+            }
+
+            // Create table row
+            const row = document.createElement('tr');
+            row.id = `result-row-${index}`;
+
+            // Email cell
+            const emailCell = document.createElement('td');
+            emailCell.textContent = result.email;
+            emailCell.className = 'align-middle';
+
+            // Status cell with badge
+            const statusCell = document.createElement('td');
+            statusCell.className = 'align-middle';
+            const statusBadge = document.createElement('span');
+            statusBadge.className = `badge ${statusClass} ${textClass}`;
+            statusBadge.textContent = result.overall_status;
+            statusCell.appendChild(statusBadge);
+
+            // Details cell with button
+            const detailsCell = document.createElement('td');
+            detailsCell.className = 'align-middle';
+
+            // Create details button
+            const detailsButton = document.createElement('button');
+            detailsButton.className = 'btn btn-sm btn-outline-secondary';
+            detailsButton.innerHTML = '<i class="fas fa-info-circle me-1"></i>Details';
+            detailsButton.setAttribute('type', 'button');
+            detailsButton.setAttribute('data-bs-toggle', 'modal');
+            detailsButton.setAttribute('data-bs-target', `#detailsModal-${index}`);
+            detailsCell.appendChild(detailsButton);
+
+            // Add cells to row
+            row.appendChild(emailCell);
+            row.appendChild(statusCell);
+            row.appendChild(detailsCell);
+
+            // Add row to table
+            tableBody.appendChild(row);
+
+            // Create modal for details
+            let mxRecordsDisplay = result.mx_records && result.mx_records.length > 0 ? result.mx_records.join(', ') : 'N/A';
+
+            // Create modal HTML
+            const modalHTML = `
+            <div class="modal fade" id="detailsModal-${index}" tabindex="-1" aria-labelledby="detailsModalLabel-${index}" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header ${statusClass} ${textClass}">
+                            <h5 class="modal-title" id="detailsModalLabel-${index}">Email Details: ${escapeHtml(result.email)}</h5>
+                            <button type="button" class="btn-close ${textClass === 'text-white' ? 'btn-close-white' : ''}" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <h6>Syntax Check:</h6>
+                                <div class="d-flex align-items-center">
+                                    <i class="fas ${result.syntax_valid ? 'fa-check-circle text-success' : 'fa-times-circle text-danger'} me-2"></i>
+                                    <span>${result.syntax_valid ? 'Valid' : 'Invalid'}</span>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <h6>Domain/MX Check:</h6>
+                                <div class="d-flex align-items-center">
+                                    <i class="fas ${result.domain_has_mx ? 'fa-check-circle text-success' : 'fa-times-circle text-danger'} me-2"></i>
+                                    <span>${result.domain_has_mx ? 'MX Records Found' : 'No MX Records / Domain Issue'}</span>
+                                </div>
+                                ${result.domain_has_mx ? `<div class="mt-2 small text-muted">MX Records: ${escapeHtml(mxRecordsDisplay)}</div>` : ''}
+                            </div>
+
+                            <div class="mb-3">
+                                <h6>SMTP Check:</h6>
+                                <div class="d-flex align-items-center">
+                                    ${result.smtp_check_attempted ? 
+                                        (result.smtp_user_exists ? 
+                                            '<i class="fas fa-check-circle text-success me-2"></i><span>User Exists</span>' : 
+                                            '<i class="fas fa-times-circle text-danger me-2"></i><span>User Does Not Exist</span>') : 
+                                        '<i class="fas fa-question-circle text-warning me-2"></i><span>Not Performed</span>'}
+                                </div>
+                                <div class="mt-2 small">${escapeHtml(result.smtp_message || 'No message')}</div>
+                            </div>
+
+                            <div class="alert ${statusClass} ${textClass} mt-3">
+                                <strong>Overall Status:</strong> ${escapeHtml(result.overall_status)}
+                            </div>
+
+                            ${result.recommendation ? 
+                                `<div class="alert alert-light border mt-3">
+                                    <strong>Recommendation:</strong> ${escapeHtml(result.recommendation)}
+                                </div>` : ''}
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>`;
+
+            // Add modal to document
+            document.body.insertAdjacentHTML('beforeend', modalHTML);
+
+            // Add to processed list
+            const eligibility = determineAutomationEligibility(result);
+            processedListContent += `${result.email}\t${eligibility.status}\n`;
+        });
+
+        finalProcessedListTextarea.value = processedListContent.trim();
+        copyProcessedListButton.disabled = processedListContent.trim() === "";
+    }
+
+    async function handleValidationRequest() {
+        logDiagnostic("SCRIPT: STEP 2 - Validate Emails button CLICKED.");
+        if (!emailListTextarea || !detailedResultsContentElement || !loaderElement || !errorMessageElement || !finalProcessedListTextarea) {
+             logDiagnostic("SCRIPT ERROR: Essential page elements missing for validation request.", true); return;
+        }
+
+        // Show the detailed results section if it's collapsed
+        if (detailedResultsContentElement.classList.contains('collapse')) {
+            new bootstrap.Collapse(detailedResultsContentElement).show();
+        }
+
+        // Update only the table body to show processing message
+        const tableBody = resultsTable.querySelector('tbody');
+        if (tableBody) {
+            tableBody.innerHTML = '<tr><td colspan="3" class="text-center">Processing... Please wait.</td></tr>';
+        }
+        finalProcessedListTextarea.value = '';
+        copyProcessedListButton.disabled = true;
+        errorMessageElement.textContent = '';
+        errorMessageElement.style.display = 'none';
+
+        const emailListText = emailListTextarea.value;
+        const emails = emailListText.split('\n').map(e => e.trim()).filter(e => e.length > 0);
+        logDiagnostic(`SCRIPT: STEP 3 - Emails parsed for validation: [${emails.join(', ')}]`);
+
+        if (emails.length === 0) {
+            detailedResultsContentElement.innerHTML = '<p class="status-warning">Please enter at least one email address to validate.</p>';
+            return;
+        }
+
+        loaderElement.style.display = 'block';
+        validateButton.disabled = true;
+
+        try {
+            logDiagnostic("SCRIPT: STEP 4 - Attempting to send FETCH request to /validator/validate-emails...");
+            const response = await fetch('/validator/validate-emails', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ emails: emails }),
+            });
+            logDiagnostic(`SCRIPT: STEP 4b - FETCH response received. Status: ${response.status} ${response.statusText}`);
+
+            if (!response.ok) {
+                let errorData;
+                try { errorData = await response.json(); }
+                catch (jsonError) { errorData = { error: `Server error: ${response.status} ${response.statusText}. Non-JSON response.` }; }
+                logDiagnostic(`FETCH ERROR: Server returned an error: ${JSON.stringify(errorData)}`, true);
+                errorMessageElement.textContent = `Server Error: ${errorData.error || response.statusText}`;
+                errorMessageElement.style.display = 'block';
+                // Update only the table body to show error message
+                const tableBody = resultsTable.querySelector('tbody');
+                if (tableBody) {
+                    tableBody.innerHTML = '<tr><td colspan="3" class="text-center text-danger">An error occurred during validation.</td></tr>';
+                }
+                return;
+            }
+
+            const serverData = await response.json();
+            logDiagnostic(`SCRIPT: STEP 4c - Parsed successful JSON response from server.`);
+            if (serverData && serverData.results) {
+                 displayValidationResults(serverData.results);
+            } else {
+                logDiagnostic("SCRIPT ERROR: Server response 'results' field missing or invalid.", true);
+                errorMessageElement.textContent = "Error: Received invalid data from server.";
+                errorMessageElement.style.display = 'block';
+                // Update only the table body to show error message
+                const tableBody = resultsTable.querySelector('tbody');
+                if (tableBody) {
+                    tableBody.innerHTML = '<tr><td colspan="3" class="text-center text-danger">Received invalid data from server.</td></tr>';
+                }
+            }
+        } catch (error) {
+            logDiagnostic(`FATAL SCRIPT ERROR during fetch() or processing: ${error.message}. Stack: ${error.stack}`, true);
+            errorMessageElement.textContent = 'CLIENT-SIDE ERROR occurred. Could not send request or process response. Check browser console (F12).';
+            errorMessageElement.style.display = 'block';
+            // Update only the table body to show error message
+            const tableBody = resultsTable.querySelector('tbody');
+            if (tableBody) {
+                tableBody.innerHTML = '<tr><td colspan="3" class="text-center text-danger">A client-side error occurred.</td></tr>';
+            }
+        } finally {
+            loaderElement.style.display = 'none';
+            validateButton.disabled = false;
+            logDiagnostic("SCRIPT: STEP 6 - Validation request process finished (either success or error).");
+        }
+    }
+
+    function showToast(message) {
+        if (!toastMessageElement) return;
+
+        // Set the toast message
+        document.getElementById('toastText').textContent = message;
+
+        // Create and show the Bootstrap toast
+        if (!toastInstance) {
+            toastInstance = new bootstrap.Toast(toastMessageElement, {
+                delay: 3000
+            });
+        }
+
+        toastInstance.show();
+    }
+
+    // Function to validate email syntax in real-time
+    function validateEmailSyntax(email) {
+        if (!email) return false;
+
+        // Basic email regex pattern
+        const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*\.[a-zA-Z]{2,}$/;
+        return emailRegex.test(email);
+    }
+
+    // Function to provide real-time feedback on email input
+    function updateEmailValidationFeedback() {
+        if (!emailListTextarea || !emailValidationFeedback) return;
+
+        const emails = emailListTextarea.value.split('\n').map(e => e.trim()).filter(e => e.length > 0);
+
+        if (emails.length === 0) {
+            emailValidationFeedback.innerHTML = '';
+            return;
+        }
+
+        let validCount = 0;
+        let invalidEmails = [];
+
+        emails.forEach(email => {
+            if (validateEmailSyntax(email)) {
+                validCount++;
+            } else {
+                invalidEmails.push(email);
+            }
+        });
+
+        // Create feedback HTML
+        let feedbackHTML = '';
+
+        if (validCount > 0) {
+            feedbackHTML += `<div class="alert alert-success mb-2 py-2">
+                <i class="fas fa-check-circle me-2"></i>${validCount} email${validCount !== 1 ? 's' : ''} with valid format
+            </div>`;
+        }
+
+        if (invalidEmails.length > 0) {
+            feedbackHTML += `<div class="alert alert-danger mb-2 py-2">
+                <i class="fas fa-exclamation-circle me-2"></i>${invalidEmails.length} email${invalidEmails.length !== 1 ? 's' : ''} with invalid format
+            </div>`;
+
+            if (invalidEmails.length <= 5) {
+                feedbackHTML += '<ul class="list-group mb-2">';
+                invalidEmails.forEach(email => {
+                    feedbackHTML += `<li class="list-group-item list-group-item-danger py-1">
+                        <small>${escapeHtml(email)} - <span class="text-danger">Invalid format</span></small>
+                    </li>`;
+                });
+                feedbackHTML += '</ul>';
+            }
+        }
+
+        emailValidationFeedback.innerHTML = feedbackHTML;
+    }
+
+    // --- Function to handle copy with robust error handling ---
+    async function copyTextToClipboard(text) {
+        if (!text) {
+            showToast("Nothing to copy!");
+            return false;
+        }
+        try {
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                await navigator.clipboard.writeText(text);
+                logDiagnostic("Clipboard API: Text copied successfully.");
+                showToast("Processed list copied to clipboard!");
+                return true;
+            } else {
+                // Fallback for older browsers or insecure contexts
+                logDiagnostic("Clipboard API not available. Attempting fallback (execCommand).");
+                const textArea = document.createElement("textarea");
+                textArea.value = text;
+                // Prevent scrolling to bottom
+                textArea.style.top = "0";
+                textArea.style.left = "0";
+                textArea.style.position = "fixed";
+                document.body.appendChild(textArea);
+                textArea.focus();
+                textArea.select();
+                try {
+                    const successful = document.execCommand('copy');
+                    document.body.removeChild(textArea);
+                    if (successful) {
+                        logDiagnostic("execCommand: Text copied successfully.");
+                        showToast("List Copied Successfully!");
+                        return true;
+                    } else {
+                        logDiagnostic("execCommand: Copy command was not successful.", true);
+                        showToast("Copy failed. Please try copying manually.");
+                        return false;
+                    }
+                } catch (err) {
+                    document.body.removeChild(textArea);
+                    logDiagnostic("execCommand: Error during copy: " + err, true);
+                    showToast("Copy failed. Please try copying manually. Error: " + err);
+                    return false;
+                }
+            }
+        } catch (err) {
+            logDiagnostic("General error during copy operation: " + err, true);
+            showToast("Could not copy text. Please try copying manually. Error: " + err);
+            return false;
+        }
+    }
+
+
+    document.addEventListener('DOMContentLoaded', () => {
+        // Initialize all elements
+        emailListTextarea = document.getElementById('emailListInput');
+        validateButton = document.getElementById('validateEmailsButton');
+        detailedResultsContentElement = document.getElementById('detailedResultsContent');
+        loaderElement = document.getElementById('loaderSpinner');
+        errorMessageElement = document.getElementById('errorMessageDisplay');
+        diagnosticsLogContentElement = document.getElementById('diagnosticsLogContent');
+        resultsTable = document.getElementById('resultsTable');
+        emailValidationFeedback = document.getElementById('emailValidationFeedback');
+        finalProcessedListTextarea = document.getElementById('finalProcessedListTextarea');
+        copyProcessedListButton = document.getElementById('copyProcessedListButton');
+        toastMessageElement = document.getElementById('toastMessage');
+
+        // Email Extractor elements
+        const rawTextInput = document.getElementById('rawTextInput');
+        const extractEmailsButton = document.getElementById('extractEmailsButton');
+        const extractedEmailsCard = document.getElementById('extractedEmailsCard');
+        const extractedEmailsCount = document.getElementById('extractedEmailsCount');
+        const extractedEmailsTextarea = document.getElementById('extractedEmailsTextarea');
+        const copyExtractedEmailsButton = document.getElementById('copyExtractedEmailsButton');
+
+        // Extract & Validate elements
+        const extractValidateInput = document.getElementById('extractValidateInput');
+        const extractValidateButton = document.getElementById('extractValidateButton');
+        const extractValidateResults = document.getElementById('extractValidateResults');
+        const totalEmailsFound = document.getElementById('totalEmailsFound');
+        const validEmailsCount = document.getElementById('validEmailsCount');
+        const potentiallyValidEmailsCount = document.getElementById('potentiallyValidEmailsCount');
+        const invalidEmailsCount = document.getElementById('invalidEmailsCount');
+        const downloadResultsButton = document.getElementById('downloadResultsButton');
+        const copyAllResultsButton = document.getElementById('copyAllResultsButton');
+        const extractValidateResultsTable = document.getElementById('extractValidateResultsTable');
+
+        // Initialize Bootstrap components
+        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+
+        // Clear any previous content
+        if(diagnosticsLogContentElement) diagnosticsLogContentElement.innerHTML = '';
+
+        logDiagnostic("SCRIPT: STEP 1 - DOM fully loaded. Initializing UI elements.");
+
+        // Validate button setup
+        if (validateButton) {
+            validateButton.addEventListener('click', handleValidationRequest);
+            logDiagnostic("SCRIPT: STEP 1b - Click listener attached to #validateEmailsButton.");
+        } else {
+            logDiagnostic("SCRIPT WARNING: Validate button #validateEmailsButton not found!", true);
+        }
+
+        // Real-time email validation
+        if (emailListTextarea && emailValidationFeedback) {
+            // Add input event listener for real-time validation
+            emailListTextarea.addEventListener('input', () => {
+                // Debounce the validation to avoid excessive processing
+                clearTimeout(emailListTextarea.debounceTimer);
+                emailListTextarea.debounceTimer = setTimeout(() => {
+                    updateEmailValidationFeedback();
+                }, 300);
+            });
+
+            logDiagnostic("SCRIPT: STEP 1c - Real-time validation listener attached to #emailListInput.");
+        } else {
+            logDiagnostic("SCRIPT WARNING: Email textarea or validation feedback element not found. Real-time validation disabled.", true);
+        }
+
+        // Detailed results toggle
+        const detailedResultsToggle = document.querySelector('#detailedResultsHeader');
+        if (detailedResultsToggle && detailedResultsContentElement) {
+            detailedResultsToggle.addEventListener('click', () => {
+                new bootstrap.Collapse(detailedResultsContentElement).toggle();
+
+                // Toggle the chevron icon
+                const icon = detailedResultsToggle.querySelector('.toggle-icon i');
+                if (icon) {
+                    icon.classList.toggle('fa-chevron-down');
+                    icon.classList.toggle('fa-chevron-up');
+                }
+            });
+
+            logDiagnostic("SCRIPT: STEP 1d - Bootstrap collapse listener attached to detailed results header.");
+        } else {
+            logDiagnostic("SCRIPT WARNING: Detailed results toggle or content not found. Collapsible results disabled.", true);
+        }
+
+        // Copy button setup
+        if (copyProcessedListButton && finalProcessedListTextarea) {
+            copyProcessedListButton.disabled = true;
+            copyProcessedListButton.addEventListener('click', () => {
+                copyTextToClipboard(finalProcessedListTextarea.value);
+            });
+            logDiagnostic("SCRIPT: STEP 1e - Click listener attached to #copyProcessedListButton.");
+        } else {
+            logDiagnostic("SCRIPT WARNING: Copy button or processed list textarea not found. Copy functionality disabled.", true);
+        }
+
+        // Email Extractor functionality
+        if (extractEmailsButton && rawTextInput) {
+            extractEmailsButton.addEventListener('click', async () => {
+                logDiagnostic("Email Extractor: Extract button clicked");
+
+                const rawText = rawTextInput.value.trim();
+                if (!rawText) {
+                    showToast("Please enter some text to extract emails from.");
+                    return;
+                }
+
+                loaderElement.style.display = 'block';
+                extractEmailsButton.disabled = true;
+
+                try {
+                    const response = await fetch('/api/extract', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ text: rawText }),
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`Server returned ${response.status}: ${response.statusText}`);
+                    }
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        const emails = data.emails || [];
+                        extractedEmailsCount.querySelector('span').textContent = `${emails.length} email${emails.length !== 1 ? 's' : ''} found`;
+                        extractedEmailsTextarea.value = emails.join('\n');
+                        extractedEmailsCard.style.display = 'block';
+
+                        if (emails.length === 0) {
+                            extractedEmailsTextarea.value = 'No email addresses found in the provided text.';
+                        }
+                    } else {
+                        showToast(`Error: ${data.error || 'Unknown error occurred'}`);
+                    }
+                } catch (error) {
+                    logDiagnostic(`Email Extractor Error: ${error.message}`, true);
+                    showToast(`Error: ${error.message}`);
+                } finally {
+                    loaderElement.style.display = 'none';
+                    extractEmailsButton.disabled = false;
+                }
+            });
+
+            if (copyExtractedEmailsButton) {
+                copyExtractedEmailsButton.addEventListener('click', () => {
+                    copyTextToClipboard(extractedEmailsTextarea.value);
+                });
+            }
+
+            logDiagnostic("Email Extractor: Event listeners initialized");
+        }
+
+        // Extract & Validate functionality
+        if (extractValidateButton && extractValidateInput) {
+            extractValidateButton.addEventListener('click', async () => {
+                logDiagnostic("Extract & Validate: Button clicked");
+
+                const rawText = extractValidateInput.value.trim();
+                if (!rawText) {
+                    showToast("Please enter some text to extract and validate emails from.");
+                    return;
+                }
+
+                loaderElement.style.display = 'block';
+                extractValidateButton.disabled = true;
+
+                try {
+                    // First extract emails from text
+                    const extractResponse = await fetch('/api/extract', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ text: rawText }),
+                    });
+
+                    if (!extractResponse.ok) {
+                        throw new Error(`Server returned ${extractResponse.status}: ${extractResponse.statusText}`);
+                    }
+
+                    const extractData = await extractResponse.json();
+
+                    if (!extractData.success || !extractData.emails || extractData.emails.length === 0) {
+                        return {
+                            success: extractData.success,
+                            results: [],
+                            error: extractData.error || "No emails found"
+                        };
+                    }
+
+                    // Then validate the extracted emails
+                    const validateResponse = await fetch('/validator/validate-emails', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ emails: extractData.emails }),
+                    });
+
+                    if (!validateResponse.ok) {
+                        throw new Error(`Server returned ${validateResponse.status}: ${validateResponse.statusText}`);
+                    }
+
+                    const validateData = await validateResponse.json();
+
+                    // Combine the results
+                    const data = {
+                        success: validateData.status === "success",
+                        results: validateData.results || []
+                    };
+
+                    if (data.success) {
+                        const results = data.results || [];
+
+                        // Update summary counts
+                        totalEmailsFound.textContent = results.length;
+
+                        let validCount = 0;
+                        let potentiallyValidCount = 0;
+                        let invalidCount = 0;
+
+                        results.forEach(result => {
+                            const status = result.overall_status.toLowerCase();
+                            if (status.includes('valid (smtp verified)')) {
+                                validCount++;
+                            } else if (status.includes('potentially valid')) {
+                                potentiallyValidCount++;
+                            } else {
+                                invalidCount++;
+                            }
+                        });
+
+                        validEmailsCount.textContent = validCount;
+                        potentiallyValidEmailsCount.textContent = potentiallyValidCount;
+                        invalidEmailsCount.textContent = invalidCount;
+
+                        // Update results table
+                        const tableBody = extractValidateResultsTable.querySelector('tbody');
+                        tableBody.innerHTML = '';
+
+                        if (results.length === 0) {
+                            tableBody.innerHTML = '<tr><td colspan="6" class="text-center">No email addresses found in the provided text.</td></tr>';
+                        } else {
+                            results.forEach((result, index) => {
+                                const row = document.createElement('tr');
+
+                                // Email cell
+                                const emailCell = document.createElement('td');
+                                emailCell.textContent = result.email;
+
+                                // Syntax cell
+                                const syntaxCell = document.createElement('td');
+                                syntaxCell.innerHTML = result.syntax_valid ? 
+                                    '<i class="fas fa-check-circle text-success"></i>' : 
+                                    '<i class="fas fa-times-circle text-danger"></i>';
+
+                                // Domain cell
+                                const domainCell = document.createElement('td');
+                                domainCell.innerHTML = result.domain_has_mx ? 
+                                    '<i class="fas fa-check-circle text-success"></i>' : 
+                                    '<i class="fas fa-times-circle text-danger"></i>';
+
+                                // SMTP cell
+                                const smtpCell = document.createElement('td');
+                                if (result.smtp_check_attempted) {
+                                    smtpCell.innerHTML = result.smtp_user_exists ? 
+                                        '<i class="fas fa-check-circle text-success"></i>' : 
+                                        '<i class="fas fa-times-circle text-danger"></i>';
+                                } else {
+                                    smtpCell.innerHTML = '<i class="fas fa-question-circle text-warning"></i>';
+                                }
+
+                                // Status cell
+                                const statusCell = document.createElement('td');
+                                let statusClass = 'bg-info';
+                                let textClass = 'text-dark';
+                                const overallStatusLower = result.overall_status.toLowerCase();
+
+                                if (overallStatusLower.includes('valid (smtp verified)')) {
+                                    statusClass = 'bg-success';
+                                    textClass = 'text-white';
+                                } else if (overallStatusLower.includes('potentially valid')) {
+                                    statusClass = 'bg-warning';
+                                } else if (overallStatusLower.includes('invalid') || 
+                                          overallStatusLower.includes('issue') || 
+                                          overallStatusLower.includes('rejected')) {
+                                    statusClass = 'bg-danger';
+                                    textClass = 'text-white';
+                                }
+
+                                const statusBadge = document.createElement('span');
+                                statusBadge.className = `badge ${statusClass} ${textClass}`;
+                                statusBadge.textContent = result.overall_status;
+                                statusCell.appendChild(statusBadge);
+
+                                // Actions cell
+                                const actionsCell = document.createElement('td');
+                                const copyButton = document.createElement('button');
+                                copyButton.className = 'btn btn-sm btn-outline-secondary me-1';
+                                copyButton.innerHTML = '<i class="fas fa-copy"></i>';
+                                copyButton.addEventListener('click', () => {
+                                    copyTextToClipboard(result.email);
+                                });
+
+                                const detailsButton = document.createElement('button');
+                                detailsButton.className = 'btn btn-sm btn-outline-info';
+                                detailsButton.innerHTML = '<i class="fas fa-info-circle"></i>';
+                                detailsButton.setAttribute('data-bs-toggle', 'tooltip');
+                                detailsButton.setAttribute('title', result.recommendation);
+
+                                actionsCell.appendChild(copyButton);
+                                actionsCell.appendChild(detailsButton);
+
+                                // Add cells to row
+                                row.appendChild(emailCell);
+                                row.appendChild(syntaxCell);
+                                row.appendChild(domainCell);
+                                row.appendChild(smtpCell);
+                                row.appendChild(statusCell);
+                                row.appendChild(actionsCell);
+
+                                // Add row to table
+                                tableBody.appendChild(row);
+                            });
+
+                            // Initialize tooltips for the new buttons
+                            const tooltips = [].slice.call(tableBody.querySelectorAll('[data-bs-toggle="tooltip"]'));
+                            tooltips.map(function (tooltipTriggerEl) {
+                                return new bootstrap.Tooltip(tooltipTriggerEl);
+                            });
+                        }
+
+                        // Show results section
+                        extractValidateResults.style.display = 'block';
+
+                        // Set up download button
+                        if (downloadResultsButton) {
+                            downloadResultsButton.addEventListener('click', async () => {
+                                try {
+                                    const response = await fetch('/api/export-csv', {
+                                        method: 'POST',
+                                        headers: { 'Content-Type': 'application/json' },
+                                        body: JSON.stringify({ 
+                                            success: true,
+                                            results: results
+                                        }),
+                                    });
+
+                                    if (!response.ok) {
+                                        throw new Error(`Server returned ${response.status}: ${response.statusText}`);
+                                    }
+
+                                    // Create a blob from the response
+                                    const blob = await response.blob();
+                                    const url = window.URL.createObjectURL(blob);
+
+                                    // Create a temporary link and click it to download
+                                    const a = document.createElement('a');
+                                    a.style.display = 'none';
+                                    a.href = url;
+                                    a.download = 'validated_emails.csv';
+                                    document.body.appendChild(a);
+                                    a.click();
+
+                                    // Clean up
+                                    window.URL.revokeObjectURL(url);
+                                    document.body.removeChild(a);
+
+                                    showToast('CSV file downloaded successfully');
+                                } catch (error) {
+                                    logDiagnostic(`CSV Export Error: ${error.message}`, true);
+                                    showToast(`Error: ${error.message}`);
+                                }
+                            });
+                        }
+
+                        // Set up copy all button
+                        if (copyAllResultsButton) {
+                            copyAllResultsButton.addEventListener('click', () => {
+                                const emailsText = results.map(r => r.email).join('\n');
+                                copyTextToClipboard(emailsText);
+                            });
+                        }
+                    } else {
+                        showToast(`Error: ${data.error || 'Unknown error occurred'}`);
+                    }
+                } catch (error) {
+                    logDiagnostic(`Extract & Validate Error: ${error.message}`, true);
+                    showToast(`Error: ${error.message}`);
+                } finally {
+                    loaderElement.style.display = 'none';
+                    extractValidateButton.disabled = false;
+                }
+            });
+
+            logDiagnostic("Extract & Validate: Event listeners initialized");
+        }
+
+        // Website Crawler functionality
+        const websiteUrl = document.getElementById('websiteUrl');
+        const crawlDepth = document.getElementById('crawlDepth');
+        const validateCrawledEmails = document.getElementById('validateCrawledEmails');
+        const crawlWebsiteButton = document.getElementById('crawlWebsiteButton');
+        const crawlerResults = document.getElementById('crawlerResults');
+        const crawledPagesCount = document.getElementById('crawledPagesCount');
+        const crawledEmailsCount = document.getElementById('crawledEmailsCount');
+        const crawledPhonesCount = document.getElementById('crawledPhonesCount');
+        const crawledSocialCount = document.getElementById('crawledSocialCount');
+        const crawledEmailsList = document.getElementById('crawledEmailsList');
+        const crawledPhonesList = document.getElementById('crawledPhonesList');
+        const crawledSocialList = document.getElementById('crawledSocialList');
+        const crawledPeopleList = document.getElementById('crawledPeopleList');
+        const downloadCrawlResultsButton = document.getElementById('downloadCrawlResultsButton');
+        const copyAllCrawlResultsButton = document.getElementById('copyAllCrawlResultsButton');
+
+        if (crawlWebsiteButton && websiteUrl) {
+            crawlWebsiteButton.addEventListener('click', async () => {
+                logDiagnostic("Website Crawler: Crawl button clicked");
+
+                const url = websiteUrl.value.trim();
+                if (!url) {
+                    showToast("Please enter a website URL to crawl.");
+                    return;
+                }
+
+                loaderElement.style.display = 'block';
+                crawlWebsiteButton.disabled = true;
+                crawlerResults.style.display = 'none';
+
+                try {
+                    // Always use the extract endpoint
+                    const response = await fetch('/api/extract', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ 
+                            url: url,
+                            crawl_depth: parseInt(crawlDepth.value) 
+                        }),
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`Server returned ${response.status}: ${response.statusText}`);
+                    }
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        // If validation is requested and we have emails, validate them
+                        if (validateCrawledEmails.checked && data.emails && data.emails.length > 0) {
+                            try {
+                                const validateResponse = await fetch('/validator/validate-emails', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ emails: data.emails }),
+                                });
+
+                                if (validateResponse.ok) {
+                                    const validateData = await validateResponse.json();
+                                    if (validateData.status === "success") {
+                                        data.validation_results = validateData.results;
+                                    }
+                                }
+                            } catch (validationError) {
+                                console.error("Error validating emails:", validationError);
+                                // Continue even if validation fails
+                            }
+                        }
+
+                        // Update summary counts
+                        crawledPagesCount.textContent = data.scanned_pages || 0;
+                        crawledEmailsCount.textContent = (data.emails || []).length;
+                        crawledPhonesCount.textContent = (data.phones || []).length;
+                        crawledSocialCount.textContent = (data.social_media || []).length;
+
+                        // Clear previous results
+                        crawledEmailsList.innerHTML = '';
+                        crawledPhonesList.innerHTML = '';
+                        crawledSocialList.innerHTML = '';
+                        crawledPeopleList.innerHTML = '';
+
+                        // Populate emails list
+                        if (data.emails && data.emails.length > 0) {
+                            data.emails.forEach(email => {
+                                const item = document.createElement('div');
+                                item.className = 'list-group-item d-flex justify-content-between align-items-center';
+
+                                // If we have validation results, show them
+                                if (validateCrawledEmails.checked && data.validation_results) {
+                                    const validationResult = data.validation_results.find(r => r.email === email);
+
+                                    if (validationResult) {
+                                        let statusClass = 'bg-info';
+                                        let textClass = 'text-dark';
+                                        const overallStatusLower = validationResult.overall_status.toLowerCase();
+
+                                        if (overallStatusLower.includes('valid (smtp verified)')) {
+                                            statusClass = 'bg-success';
+                                            textClass = 'text-white';
+                                        } else if (overallStatusLower.includes('potentially valid')) {
+                                            statusClass = 'bg-warning';
+                                        } else if (overallStatusLower.includes('invalid') || 
+                                                  overallStatusLower.includes('issue') || 
+                                                  overallStatusLower.includes('rejected')) {
+                                            statusClass = 'bg-danger';
+                                            textClass = 'text-white';
+                                        }
+
+                                        item.innerHTML = `
+                                            <div>
+                                                <span>${email}</span>
+                                                <span class="badge ${statusClass} ${textClass} ms-2">${validationResult.overall_status}</span>
+                                            </div>
+                                            <div>
+                                                <button class="btn btn-sm btn-outline-secondary copy-btn" data-text="${email}">
+                                                    <i class="fas fa-copy"></i>
+                                                </button>
+                                            </div>
+                                        `;
+                                    } else {
+                                        item.innerHTML = `
+                                            <div>${email}</div>
+                                            <div>
+                                                <button class="btn btn-sm btn-outline-secondary copy-btn" data-text="${email}">
+                                                    <i class="fas fa-copy"></i>
+                                                </button>
+                                            </div>
+                                        `;
+                                    }
+                                } else {
+                                    item.innerHTML = `
+                                        <div>${email}</div>
+                                        <div>
+                                            <button class="btn btn-sm btn-outline-secondary copy-btn" data-text="${email}">
+                                                <i class="fas fa-copy"></i>
+                                            </button>
+                                        </div>
+                                    `;
+                                }
+
+                                crawledEmailsList.appendChild(item);
+                            });
+                        } else {
+                            crawledEmailsList.innerHTML = '<div class="list-group-item">No email addresses found.</div>';
+                        }
+
+                        // Populate phones list
+                        if (data.phones && data.phones.length > 0) {
+                            data.phones.forEach(phone => {
+                                const item = document.createElement('div');
+                                item.className = 'list-group-item d-flex justify-content-between align-items-center';
+                                item.innerHTML = `
+                                    <div>${phone}</div>
+                                    <div>
+                                        <button class="btn btn-sm btn-outline-secondary copy-btn" data-text="${phone}">
+                                            <i class="fas fa-copy"></i>
+                                        </button>
+                                    </div>
+                                `;
+                                crawledPhonesList.appendChild(item);
+                            });
+                        } else {
+                            crawledPhonesList.innerHTML = '<div class="list-group-item">No phone numbers found.</div>';
+                        }
+
+                        // Populate social media list
+                        if (data.social_media && data.social_media.length > 0) {
+                            data.social_media.forEach(link => {
+                                let platform = 'Social Media';
+                                let icon = 'fa-share-alt';
+
+                                if (link.includes('facebook.com')) {
+                                    platform = 'Facebook';
+                                    icon = 'fa-facebook';
+                                } else if (link.includes('twitter.com') || link.includes('x.com')) {
+                                    platform = 'Twitter/X';
+                                    icon = 'fa-twitter';
+                                } else if (link.includes('linkedin.com')) {
+                                    platform = 'LinkedIn';
+                                    icon = 'fa-linkedin';
+                                } else if (link.includes('instagram.com')) {
+                                    platform = 'Instagram';
+                                    icon = 'fa-instagram';
+                                } else if (link.includes('t.me')) {
+                                    platform = 'Telegram';
+                                    icon = 'fa-telegram';
+                                } else if (link.includes('wa.me') || link.includes('whatsapp.com')) {
+                                    platform = 'WhatsApp';
+                                    icon = 'fa-whatsapp';
+                                } else if (link.includes('youtube.com')) {
+                                    platform = 'YouTube';
+                                    icon = 'fa-youtube';
+                                } else if (link.includes('github.com')) {
+                                    platform = 'GitHub';
+                                    icon = 'fa-github';
+                                }
+
+                                const item = document.createElement('div');
+                                item.className = 'list-group-item d-flex justify-content-between align-items-center';
+                                item.innerHTML = `
+                                    <div>
+                                        <i class="fab ${icon} me-2"></i>
+                                        <a href="${link}" target="_blank">${link}</a>
+                                        <span class="badge bg-secondary ms-2">${platform}</span>
+                                    </div>
+                                    <div>
+                                        <button class="btn btn-sm btn-outline-secondary copy-btn" data-text="${link}">
+                                            <i class="fas fa-copy"></i>
+                                        </button>
+                                    </div>
+                                `;
+                                crawledSocialList.appendChild(item);
+                            });
+                        } else {
+                            crawledSocialList.innerHTML = '<div class="list-group-item">No social media links found.</div>';
+                        }
+
+                        // Populate people list
+                        if (data.people && data.people.length > 0) {
+                            data.people.forEach(person => {
+                                const item = document.createElement('div');
+                                item.className = 'list-group-item';
+                                item.innerHTML = `
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <i class="fas fa-user me-2"></i>
+                                            <strong>${person.name}</strong>
+                                            <span class="text-muted ms-2">${person.title}</span>
+                                        </div>
+                                        <div>
+                                            <button class="btn btn-sm btn-outline-secondary copy-btn" data-text="${person.name} - ${person.title}">
+                                                <i class="fas fa-copy"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                `;
+                                crawledPeopleList.appendChild(item);
+                            });
+                        } else {
+                            crawledPeopleList.innerHTML = '<div class="list-group-item">No people information found.</div>';
+                        }
+
+                        // Add event listeners to copy buttons
+                        document.querySelectorAll('.copy-btn').forEach(button => {
+                            button.addEventListener('click', () => {
+                                const text = button.getAttribute('data-text');
+                                copyTextToClipboard(text);
+                            });
+                        });
+
+                        // Set up download button
+                        if (downloadCrawlResultsButton) {
+                            downloadCrawlResultsButton.addEventListener('click', async () => {
+                                try {
+                                    const response = await fetch('/api/export-csv', {
+                                        method: 'POST',
+                                        headers: { 'Content-Type': 'application/json' },
+                                        body: JSON.stringify(data),
+                                    });
+
+                                    if (!response.ok) {
+                                        throw new Error(`Server returned ${response.status}: ${response.statusText}`);
+                                    }
+
+                                    // Create a blob from the response
+                                    const blob = await response.blob();
+                                    const url = window.URL.createObjectURL(blob);
+
+                                    // Create a temporary link and click it to download
+                                    const a = document.createElement('a');
+                                    a.style.display = 'none';
+                                    a.href = url;
+                                    a.download = 'contact_info.csv';
+                                    document.body.appendChild(a);
+                                    a.click();
+
+                                    // Clean up
+                                    window.URL.revokeObjectURL(url);
+                                    document.body.removeChild(a);
+
+                                    showToast('CSV file downloaded successfully');
+                                } catch (error) {
+                                    logDiagnostic(`CSV Export Error: ${error.message}`, true);
+                                    showToast(`Error: ${error.message}`);
+                                }
+                            });
+                        }
+
+                        // Set up copy all emails button
+                        if (copyAllCrawlResultsButton) {
+                            copyAllCrawlResultsButton.addEventListener('click', () => {
+                                const emailsText = data.emails.join('\n');
+                                copyTextToClipboard(emailsText);
+                            });
+                        }
+
+                        // Show results section
+                        crawlerResults.style.display = 'block';
+                    } else {
+                        showToast(`Error: ${data.error || 'Unknown error occurred'}`);
+                    }
+                } catch (error) {
+                    logDiagnostic(`Website Crawler Error: ${error.message}`, true);
+                    showToast(`Error: ${error.message}`);
+                } finally {
+                    loaderElement.style.display = 'none';
+                    crawlWebsiteButton.disabled = false;
+                }
+            });
+
+            logDiagnostic("Website Crawler: Event listeners initialized");
+        }
+
+        // Initialize accessibility features
+        document.querySelectorAll('.btn, [role="button"]').forEach(button => {
+            if (!button.getAttribute('aria-label') && button.textContent.trim()) {
+                button.setAttribute('aria-label', button.textContent.trim());
+            }
+        });
+
+        logDiagnostic("SCRIPT: STEP 1f - Accessibility attributes initialized.");
+    });
+</script>
+
+<!-- Bootstrap JS Bundle with Popper -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
